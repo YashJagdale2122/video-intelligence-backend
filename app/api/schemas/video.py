@@ -9,6 +9,16 @@ class VideoIngestResponse(BaseModel):
 
 
 class VideoStatusResponse(BaseModel):
+
+    """
+    Represents the current processing state and available intelligence
+    outputs for a video.
+
+    AI-related fields are optional to support partial-success scenarios
+    where individual NLP or CV pipelines may fail independently.
+
+    """
+
     video_id: str
     status: str
     metadata: Optional[dict] = None
