@@ -14,3 +14,8 @@ class ProcessingStatus(str,Enum):
     COMPLETED = "COMPLETED"
     PARTIAL_SUCCESS = "PARTIAL_SUCCESS"
     FAILED = "FAILED"
+
+class SourceType(str,Enum):
+
+    UPLOAD = "UPLOAD"
+    URL = "URL"
