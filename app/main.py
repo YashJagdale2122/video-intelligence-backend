@@ -8,7 +8,3 @@ app.include_router(videos.router)
 @app.get("/api/v1/health")
 def health_check():
     return {"status" : "Ok"}
-
-@app.on_event("startup")
-def on_startup():
-    Base.metadata.create_all(bind=engine)
