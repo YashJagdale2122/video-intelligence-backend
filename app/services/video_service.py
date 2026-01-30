@@ -1,4 +1,5 @@
 from uuid import uuid4
+from uuid import UUID
 from sqlalchemy.orm import Session
 
 from app.infrastructure.db.repositories.video_repository import VideoRepository
@@ -24,3 +25,6 @@ class VideoService:
         )
 
         return self.repo.create_video(video)
+
+    def get_video(self, video_id: UUID):
+       return self.repo.get_video_by_id(video_id)

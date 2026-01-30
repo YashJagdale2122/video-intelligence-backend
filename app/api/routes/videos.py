@@ -1,11 +1,13 @@
 from fastapi import APIRouter, UploadFile, File, Form, HTTPException, Depends
 from typing import Optional
 from sqlalchemy.orm import Session
+from uuid import UUID
 
 from app.api.schemas.video import (VideoIngestResponse, VideoStatusResponse, VideoListResponse)
 from app.api.dependencies import get_db
 from app.services.video_service import VideoService
 from app.domain.enums import SourceType
+
 
 router = APIRouter(prefix="/api/v1/videos", tags=["Videos"])
 
@@ -51,10 +53,20 @@ async def ingest_video(
 
 
 @router.get("/{video_id}", response_model=VideoStatusResponse)
-async def get_video_status(video_id: str):
+async def get_video_status(video_id: str, db: Session = Depends(get_db)):
+
+    service = VideoService(db)
+    video = service.get_video(video_id)
+
+    if not video:
+        raise HTTPException(status_code=404, detail="Video not found")
+
     return VideoStatusResponse(
-        video_id=video_id,
-        status="PROCESSING"
+        video_id=str(video.id),
+        source_type=video.source_type,
+        status=video.status,
+        storage_path=video.storage_path,
+        created_at=video.created_at,
     )
 
 

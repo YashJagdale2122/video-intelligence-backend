@@ -1,6 +1,7 @@
 from typing import Optional
 from pydantic import BaseModel, HttpUrl, Field
-
+from datetime import datetime
+from app.domain.enums import ProcessingStatus, SourceType
 
 class VideoIngestResponse(BaseModel):
     video_id: str
@@ -20,12 +21,18 @@ class VideoStatusResponse(BaseModel):
     """
 
     video_id: str
-    status: str
+    source_type: SourceType
+    status: ProcessingStatus
+    storage_path: str
+    created_at: datetime
     metadata: Optional[dict] = None
     nlp_result: Optional[dict] = None
     cv_result: Optional[dict] = None
     risk_analysis: Optional[dict] = None
     errors: Optional[list] = None
+
+    class Config:
+        from_attributes = True
 
 class VideoListItem(BaseModel):
     video_id: str
