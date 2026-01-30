@@ -1,11 +1,11 @@
 import uuid
 from sqlalchemy import Column, String, Float, Text, Enum, ForeignKey, TIMESTAMP
-from sqlalchemy.dialects.postgresql import UUID, JSONB
+from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 from app.core.database import Base
 from app.domain.enums import ProcessingStatus,SourceType
-
+from app.core.db_types import JSONType
 
 class Video(Base):
     __tablename__ = "videos"
@@ -33,10 +33,10 @@ class AIResult(Base):
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     video_id = Column(UUID(as_uuid=True), ForeignKey("videos.id"), nullable=False)
 
-    nlp_result = Column(JSONB, nullable=True)
-    cv_result = Column(JSONB, nullable=True)
-    risk_result = Column(JSONB, nullable=True)
-    errors = Column(JSONB, nullable=True)
+    nlp_result = Column(JSONType, nullable=True)
+    cv_result = Column(JSONType, nullable=True)
+    risk_result = Column(JSONType, nullable=True)
+    errors = Column(JSONType, nullable=True)
 
     created_at = Column(TIMESTAMP(timezone=True), server_default=func.now())
     updated_at = Column(TIMESTAMP(timezone=True),server_default=func.now(), onupdate=func.now())
