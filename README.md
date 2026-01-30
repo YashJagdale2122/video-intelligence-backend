@@ -1,5 +1,9 @@
 ## Video Intelligence Backend
 
+![Python](https://img.shields.io/badge/python-3.12-blue)
+![FastAPI](https://img.shields.io/badge/FastAPI-backend-green)
+![Docker](https://img.shields.io/badge/Docker-ready-blue)
+
 This project is a backend system that ingests video inputs (file or URL) and asynchronously processes them to produce structured intelligence outputs. It demonstrates clean backend architecture, lifecycle-driven APIs, and async processing using FastAPI, PostgreSQL, and Docker.
 
 
@@ -22,12 +26,19 @@ The system is implemented as a modular monolith with strict separation of respon
 
 
 POST /videos
+
   → VideoService
+  
     → VideoRepository
+    
       → PostgreSQL
+      
   → Background Task
+  
     → PROCESSING
+    
     → COMPLETED
+    
 
 
 ## API Design
@@ -64,12 +75,13 @@ The system is fully containerized using Docker Compose.
 
 ```bash
 docker-compose up --build
-
+```
 This starts:
     FastAPI backend
     PostgreSQL database
-
+    
 The API is available at:
+```bash
 http://localhost:8000/docs
 ```
 
