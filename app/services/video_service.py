@@ -2,7 +2,7 @@ from uuid import uuid4
 from uuid import UUID
 from sqlalchemy.orm import Session
 import time
-
+import uuid
 from app.infrastructure.db.repositories.video_repository import VideoRepository
 from app.infrastructure.db.models import Video
 from app.domain.enums import ProcessingStatus, SourceType
