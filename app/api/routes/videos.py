@@ -1,4 +1,5 @@
-from fastapi import APIRouter, UploadFile, File, Form, HTTPException, Depends
+from fastapi import APIRouter, UploadFile, File, Form, HTTPException, Depends, BackgroundTasks
+
 from typing import Optional
 from sqlalchemy.orm import Session
 from uuid import UUID
@@ -14,6 +15,7 @@ router = APIRouter(prefix="/api/v1/videos", tags=["Videos"])
 
 @router.post("", response_model=VideoIngestResponse)
 async def ingest_video(
+    background_tasks: BackgroundTasks,
     file: UploadFile | None = File(None),
     video_url: str | None = Form(None),
     db : Session = Depends(get_db)
@@ -44,6 +46,11 @@ async def ingest_video(
             source_url = video_url,
             storage_path = "remote"
         )
+
+    background_tasks.add_task(
+        service.process_video_stub,
+        video.id
+    )
 
     return VideoIngestResponse(
         video_id=str(video.id),

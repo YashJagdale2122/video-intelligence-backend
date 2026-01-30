@@ -1,6 +1,7 @@
 from uuid import uuid4
 from uuid import UUID
 from sqlalchemy.orm import Session
+import time
 
 from app.infrastructure.db.repositories.video_repository import VideoRepository
 from app.infrastructure.db.models import Video
@@ -28,3 +29,19 @@ class VideoService:
 
     def get_video(self, video_id: UUID):
        return self.repo.get_video_by_id(video_id)
+
+    def process_video_stub(self, video_id: UUID):
+        """
+        Simulates asynchronous video processing.
+        This is a placeholder for AI pipelines.
+        """
+
+        video = self.repo.get_video_by_id(video_id)
+        if not video:
+            return
+
+        self.repo.update_status(video_id,ProcessingStatus.PROCESSING)
+
+        time.sleep(10)
+
+        self.repo.update_status(video_id,ProcessingStatus.COMPLETED)
