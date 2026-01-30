@@ -65,8 +65,10 @@ Client → API → Service → Repository → Database
 
 ```bash
 docker-compose up --build
+```
 
 API will be available at:
+```bash
 http://localhost:8000
 ```
 
@@ -82,11 +84,10 @@ Response:
   "video_id": "uuid",
   "status": "UPLOADED"
 }
-
-Get Video Status:
-
+```
+### Get Video Status
 GET `/api/v1/videos/{video_id}`
- ```
+
  
  
  ## Testing

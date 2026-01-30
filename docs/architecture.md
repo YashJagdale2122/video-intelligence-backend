@@ -1,4 +1,3 @@
-````md
 # System Architecture
 
 This document describes the architecture, design decisions, and data flow
