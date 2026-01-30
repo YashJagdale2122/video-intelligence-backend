@@ -1,102 +1,106 @@
 ## Video Intelligence Backend
 
+![CI](https://github.com/YashJagdale2122/video-intelligence-backend/actions/workflows/ci.yml/badge.svg)
 ![Python](https://img.shields.io/badge/python-3.12-blue)
-![FastAPI](https://img.shields.io/badge/FastAPI-backend-green)
-![Docker](https://img.shields.io/badge/Docker-ready-blue)
-
-This project is a backend system that ingests video inputs (file or URL) and asynchronously processes them to produce structured intelligence outputs. It demonstrates clean backend architecture, lifecycle-driven APIs, and async processing using FastAPI, PostgreSQL, and Docker.
+![FastAPI](https://img.shields.io/badge/FastAPI-async-green)
+![Docker](https://img.shields.io/badge/docker-ready-blue)
+![Postgres](https://img.shields.io/badge/database-postgresql-blue)
 
 
 ## Problem Statement
 
-Processing video content involves long-running, resource-intensive tasks such as transcription and visual analysis. Many systems either block requests synchronously or tightly couple business logic with infrastructure.
-
-This project focuses on designing a backend that cleanly separates concerns, supports asynchronous processing, and exposes a clear lifecycle for video ingestion and analysis.
-
-
-## Architecture Overview
-
-The system is implemented as a modular monolith with strict separation of responsibilities:
-
-- API Layer: Handles HTTP requests and validation
-- Service Layer: Encapsulates business logic and lifecycle transitions
-- Repository Layer: Manages database persistence
-- Database: PostgreSQL for structured storage
-- Background Processing: FastAPI background tasks for async workflows
+Modern video platforms require automated analysis of large volumes of video content.
+This includes transcription, visual understanding, and risk assessment — all of which
+are time-consuming and unsuitable for synchronous processing.
 
 
-POST /videos
+## Solution Overview
 
-  → VideoService
-  
-    → VideoRepository
-    
-      → PostgreSQL
-      
-  → Background Task
-  
-    → PROCESSING
-    
-    → COMPLETED
-    
+This project implements a modular FastAPI backend that ingests videos and processes
+them asynchronously using an AI pipeline. The system is designed for scalability,
+clear separation of concerns, and production readiness.
 
 
-## API Design
+## Architecture
 
-### POST /api/v1/videos
-Ingests a video via file upload or URL and returns a video identifier.
+The design follows a layered architecture to ensure testability, maintainability, and clear separation of concerns.
 
-### GET /api/v1/videos/{id}
-Returns the current processing status and metadata for a video.
+- **API Layer**: FastAPI routes handling HTTP requests
+- **Service Layer**: Business logic and orchestration
+- **Repository Layer**: Database access using SQLAlchemy
+- **Domain Layer**: Enums and domain models
+- **Infrastructure Layer**: Database and background processing
 
+```bash
+Client → API → Service → Repository → Database
+                   ↓
+             Background Worker (AI processing)
 
-## Processing Lifecycle
-
-Each video follows a defined lifecycle:
-
-- UPLOADED: Video accepted by the system
-- PROCESSING: Background processing in progress
-- COMPLETED: Processing finished successfully
-
-The current implementation uses a background processing stub to simulate AI workloads. This design allows easy replacement with a task queue such as Celery in future iterations.
+```
 
 
-## Database Design
+## Key Features
 
-- videos: Stores video metadata and processing state
-- ai_results: Reserved for storing AI-generated outputs
+- Asynchronous video ingestion
+- Background AI processing (stubbed for extensibility)
+- Status tracking using enums
+- PostgreSQL with SQLAlchemy ORM
+- Dockerized development environment
+- Automated tests with Pytest
+- CI pipeline using GitHub Actions
 
-AI-related fields are stored as JSON to allow schema flexibility as models evolve.
+
+## Tech Stack
+
+- **Backend**: FastAPI (Python 3.12)
+- **Database**: PostgreSQL
+- **ORM**: SQLAlchemy
+- **Async Processing**: Background tasks
+- **Testing**: Pytest
+- **CI/CD**: GitHub Actions
+- **Containerization**: Docker & Docker Compose
 
 
-## Running the Project
-
-The system is fully containerized using Docker Compose.
+## Running Locally
 
 ```bash
 docker-compose up --build
-```
-This starts:
-    FastAPI backend
-    PostgreSQL database
-    
-The API is available at:
-```bash
-http://localhost:8000/docs
+
+API will be available at:
+http://localhost:8000
 ```
 
 
-## Design Decisions & Trade-offs
+## API Example
 
-- Modular Monolith: Chosen over microservices to reduce distributed complexity while maintaining clean internal boundaries.
-- Background Tasks: Used instead of a full task queue to validate async workflows with minimal infrastructure.
-- JSON Storage for AI Results: Prevents frequent schema migrations as AI outputs evolve.
-- Docker After Validation: The backend was validated locally before containerization to ensure understanding of failure modes.
+### Ingest Video
+POST `/api/v1/videos`
 
+Response:
+```json
+{
+  "video_id": "uuid",
+  "status": "UPLOADED"
+}
 
-## Future Improvements
+Get Video Status:
 
-- Replace background task stub with a distributed task queue
-- Persist AI analysis outputs
-- Add retry and failure handling
-- Introduce migrations using Alembic
+GET `/api/v1/videos/{video_id}`
+ ```
+ 
+ 
+ ## Testing
+ 
+ ```bash
+ pytest
+ ```
+ All tests are automatically executed via GitHub Actions on every push.
+
+ 
+ ## Future Improvements
+ 
+ - Real AI pipeline integration
+ - Message queue (Kafka / RabbitMQ)
+ - Retry & failure handling
+ - Improved test coverage
+ - API authentication
