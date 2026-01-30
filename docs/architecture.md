@@ -1,250 +1,213 @@
-# System Architecture
+# Architecture
 
-This document describes the architecture, design decisions, and data flow
-for the **Video Intelligence Backend**.
+## Overview
 
-The system is designed as a **modular monolith** with clear internal boundaries,
-optimized for maintainability, testability, and future scalability.
+The **Video Intelligence Backend** is designed as a modular, scalable backend system
+for ingesting and processing video content asynchronously.
 
-## High-Level Architecture
+The architecture follows **clean layering principles** to ensure:
+- Clear separation of concerns
+- Testability
+- Long-term maintainability
+- Easy extension to real AI pipelines and distributed systems
 
-```text
-Client
-  |
-  v
-FastAPI API Layer
-  |
-  v
-Service Layer (Business Logic)
-  |
-  v
-Repository Layer
-  |
-  v
-PostgreSQL Database
-  |
-  +--> Background Task (AI Processing Stub)
+The system is optimized for **fast ingestion**, while heavy AI workloads are handled
+outside the request-response cycle.
+
+
+
+
+## System Architecture Diagram
+
+```mermaid
+flowchart LR
+    Client[Client / Frontend] -->|HTTP Requests| API[FastAPI API Layer]
+
+    API --> Service[Service Layer]
+    Service --> Repo[Repository Layer]
+    Repo --> DB[(PostgreSQL Database)]
+
+    Service -->|Trigger| BG[Background Task]
+    BG --> AI[AI Processing Pipeline]
+    AI --> Repo
 ````
 
-### Key Characteristics
-
-* Single deployable backend (modular monolith)
-* Clear separation of concerns
-* Asynchronous background processing
-* Database-backed state tracking
 
 
+## Core Components
 
-## Layered Responsibilities
-
-### API Layer
+### 1. API Layer (FastAPI)
 
 **Responsibility**
 
-* Handle HTTP requests and responses
-* Perform request validation
-* Convert domain objects to API schemas
+* Handle HTTP requests
+* Validate input/output schemas
+* Return fast responses to clients
 
-**What it does NOT do**
+**Key Characteristics**
 
+* Thin controllers
 * No business logic
-* No database operations
-* No status transitions
+* Async-first design
+
+**Examples**
+
+* `POST /api/v1/videos`
+* `GET /api/v1/videos/{video_id}`
 
 
 
-### Service Layer
-
-**Responsibility**
-
-* Core business logic
-* Orchestrates workflows
-* Controls state transitions (e.g., `UPLOADED → PROCESSING`)
-
-**Why this layer exists**
-
-* Centralizes domain rules
-* Makes logic testable
-* Prevents fat controllers or smart repositories
-
-
-
-### Repository Layer
+### 2. Service Layer
 
 **Responsibility**
 
-* Database interaction via SQLAlchemy
-* CRUD operations
-* Transaction handling
+* Business logic orchestration
+* Workflow coordination
+* Trigger background processing
 
-**What it does NOT do**
+**Why it exists**
 
-* No business decisions
-* No status changes
-* No workflow logic
+* Prevents logic leakage into API routes
+* Makes business rules testable and reusable
 
+**Examples**
 
-
-### Domain Layer
-
-**Responsibility**
-
-* Enums (e.g., processing status, source type)
-* Domain concepts shared across layers
-
-**Why enums are used**
-
-* Prevent inconsistent string usage
-* Enforce valid state transitions
-* Ensure consistency across API, service, and persistence layers
+* Video ingestion workflow
+* Status transitions (`UPLOADED → PROCESSING → COMPLETED`)
 
 
 
-### Infrastructure Layer
+### 3. Repository Layer
 
 **Responsibility**
 
-* Database configuration
-* Background task execution
-* External system integration (future)
+* Database access abstraction
+* ORM interaction via SQLAlchemy
 
-Currently includes:
+**Why it exists**
 
-* PostgreSQL setup
-* SQLAlchemy session management
-* Background processing stub
+* Decouples persistence from business logic
+* Makes database changes low-impact
+
+**Examples**
+
+* Create video record
+* Fetch video by ID
+* Update processing status
 
 
 
-## Request Flow
+### 4. Database Layer (PostgreSQL)
+
+**Responsibility**
+
+* Persistent storage
+* Transactional consistency
+* Source of truth for video state
+
+**Stored Data**
+
+* Video metadata
+* Processing status
+* Timestamps
+* AI results (future)
+
+
+
+### 5. Background Processing
+
+**Responsibility**
+
+* Execute long-running AI workflows
+* Prevent blocking API requests
+
+**Current Implementation**
+
+* FastAPI background tasks (stubbed)
+
+**Future Ready For**
+
+* Celery / RQ
+* Kafka / RabbitMQ
+* Distributed workers
+
+
+
+### 6. AI Processing Pipeline (Pluggable)
+
+**Responsibility**
+
+* Video analysis
+* Transcription
+* NLP / Vision / Risk detection
+
+**Current State**
+
+* Stubbed for extensibility
+
+**Future Integrations**
+
+* Whisper / ASR
+* Vision models
+* Custom LLM pipelines
+
+
+
+## Request Flow (Step-by-Step)
 
 ### Video Ingestion Flow
 
-```text
-1. Client sends POST /api/v1/videos
+1. Client sends `POST /api/v1/videos`
 2. API validates input
-3. Service creates Video entity with status = UPLOADED
-4. Repository persists video record
+3. Service creates video entry with status `UPLOADED`
+4. Repository persists data in database
 5. Background task is triggered
-6. API responds immediately with video_id
-```
-
-### Status Retrieval Flow
-
-```text
-1. Client sends GET /api/v1/videos/{video_id}
-2. API delegates to service
-3. Repository fetches video record
-4. API returns current processing status
-```
+6. API responds immediately to client
 
 
 
-## Asynchronous Processing Design
+### Video Status Retrieval Flow
 
-### Why Asynchronous Processing?
-
-* Video analysis (AI, transcription, vision) is time-consuming
-* Synchronous processing would block API threads
-* Poor user experience and low throughput
-
-### Current Implementation
-
-* Uses FastAPI background tasks (stub)
-* Simulates long-running AI processing
-* Updates status asynchronously
-
-### Future Evolution
-
-* Replace background task with:
-
-  * Celery + Redis/RabbitMQ **or**
-  * Kafka-based worker
-* Add retry and failure recovery
-* Isolate AI processing into a separate service if needed
+1. Client sends `GET /api/v1/videos/{video_id}`
+2. API calls service
+3. Service queries repository
+4. Repository fetches from database
+5. API returns current status
 
 
 
-## Database Design Overview
+## Design Decisions
 
-### Core Tables
+### Why Async Processing?
 
-* `videos`
-* `ai_results`
-
-### Key Design Decisions
-
-* `videos` stores ingestion metadata and processing state
-* `ai_results` stores AI outputs in JSON format
-* AI fields are optional to support partial results
-
-### Why JSON Fields?
-
-* AI outputs are unstructured and evolving
-* Avoid premature schema rigidity
-* Enables faster iteration
+* AI workloads are slow and unpredictable
+* Keeps ingestion latency low
+* Enables horizontal scaling
 
 
 
-## Design Decisions & Rationale
+### Why Layered Architecture?
 
-### Why Modular Monolith?
-
-* Lower operational complexity than microservices
-* Avoids network overhead and distributed failures
-* Easier local development and debugging
-* Internal modules allow future service extraction
+* Prevents tight coupling
+* Enables isolated testing
+* Allows independent evolution of layers
 
 
 
-### Why Service Controls Status?
+### Why Repository Pattern?
 
-* Status transitions are **business rules**
-* Prevents duplication across routes
-* Enables validation and future enforcement of state machines
-
-
-
-### Why Repository Does Not Contain Logic?
-
-* Keeps persistence concerns isolated
-* Improves testability
-* Avoids tight coupling between storage and business rules
+* Database independence
+* Cleaner service logic
+* Easier migration to new storage systems
 
 
 
-### Why Return Domain Objects from Services?
+## Scalability & Future Architecture
 
-* Allows API layer to control response shaping
-* Prevents leakage of transport concerns into domain logic
-* Makes service reusable by other interfaces (CLI, workers, gRPC)
+Planned upgrades without architectural changes:
 
-
-
-## Trade-offs & Limitations
-
-```text
-Current Trade-offs:
-- Background tasks are in-process
-- No distributed queue yet
-- No retry or dead-letter handling
-- JSON fields reduce relational querying
-
-Intentional Reasoning:
-- Optimized for clarity and learning
-- Avoid premature optimization
-- Architecture supports gradual evolution
-```
-
-
-
-## Scalability Considerations
-
-If load increases:
-
-* Introduce message queue for background processing
-* Add worker pool for AI tasks
-* Cache status reads if needed
-* Extract AI processing into separate service
-
-The current design supports these changes without major refactoring.
+* Replace background tasks with message queues
+* Add multiple AI workers
+* Introduce caching (Redis)
+* Add authentication & authorization
+* Introduce observability (metrics, tracing)
