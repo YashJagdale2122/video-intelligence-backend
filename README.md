@@ -3,9 +3,11 @@
 This project is a backend system that ingests video inputs (file or URL) and asynchronously processes them to produce structured intelligence outputs. It demonstrates clean backend architecture, lifecycle-driven APIs, and async processing using FastAPI, PostgreSQL, and Docker.
 
 
-## Video Intelligence Backend
+## Problem Statement
 
-This project is a backend system that ingests video inputs (file or URL) and asynchronously processes them to produce structured intelligence outputs. It demonstrates clean backend architecture, lifecycle-driven APIs, and async processing using FastAPI, PostgreSQL, and Docker.
+Processing video content involves long-running, resource-intensive tasks such as transcription and visual analysis. Many systems either block requests synchronously or tightly couple business logic with infrastructure.
+
+This project focuses on designing a backend that cleanly separates concerns, supports asynchronous processing, and exposes a clear lifecycle for video ingestion and analysis.
 
 
 ## Architecture Overview
@@ -70,6 +72,8 @@ This starts:
 The API is available at:
 http://localhost:8000/docs
 ```
+
+
 ## Design Decisions & Trade-offs
 
 - Modular Monolith: Chosen over microservices to reduce distributed complexity while maintaining clean internal boundaries.
