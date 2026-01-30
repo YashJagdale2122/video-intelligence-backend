@@ -1,12 +1,9 @@
-from sqlalchemy import create_engine
-from app.core.database import Base
-from app.core.config import settings
+from app.core.database import Base, engine
 
 
 def pytest_sessionstart(session):
     """
-    Create database tables at the start of the test session.
-    Ensures schema exists for SQLite-based test runs (CI).
+    Create database tables on the SAME engine used by the application.
+    This is critical for SQLite and CI environments.
     """
-    engine = create_engine(settings.DATABASE_URL)
     Base.metadata.create_all(bind=engine)
