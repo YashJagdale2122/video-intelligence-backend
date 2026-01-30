@@ -3,7 +3,7 @@ from fastapi import APIRouter, UploadFile, File, Form, HTTPException, Depends, B
 from typing import Optional
 from sqlalchemy.orm import Session
 from uuid import UUID
-
+import uuid
 from app.api.schemas.video import (VideoIngestResponse, VideoStatusResponse, VideoListResponse)
 from app.api.dependencies import get_db
 from app.services.video_service import VideoService
@@ -60,7 +60,7 @@ async def ingest_video(
 
 
 @router.get("/{video_id}", response_model=VideoStatusResponse)
-async def get_video_status(video_id: str, db: Session = Depends(get_db)):
+async def get_video_status(video_id: uuid.UUID, db: Session = Depends(get_db)):
 
     service = VideoService(db)
     video = service.get_video(video_id)

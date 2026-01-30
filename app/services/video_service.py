@@ -27,7 +27,7 @@ class VideoService:
 
         return self.repo.create_video(video)
 
-    def get_video(self, video_id: UUID):
+    def get_video(self, video_id: uuid.UUID):
        return self.repo.get_video_by_id(video_id)
 
     def process_video_stub(self, video_id: UUID):
