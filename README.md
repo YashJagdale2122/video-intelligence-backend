@@ -60,16 +60,68 @@ Client → API → Service → Repository → Database
 - **CI/CD**: GitHub Actions
 - **Containerization**: Docker & Docker Compose
 
+## Quick Start
 
-## Running Locally
+### Prerequisites
 
+- Docker & Docker Compose installed
+- Python 3.12+ (for local development without Docker)
+- PostgreSQL (handled by Docker Compose)
+
+### 1. Clone the Repository
+```bash
+git clone https://github.com/YashJagdale2122/video-intelligence-backend.git
+cd video-intelligence-backend
+```
+
+### 2. Environment Setup
+
+Copy the example environment file:
+```bash
+cp .env.example .env
+```
+
+Edit `.env` with your configuration (defaults work for local development).
+
+### 3. Start the Services
 ```bash
 docker-compose up --build
 ```
 
-API will be available at:
+The API will be available at:
+- **API Base**: http://localhost:8000
+- **Swagger Docs**: http://localhost:8000/docs
+- **Health Check**: http://localhost:8000/health
+
+### 4. Test the API
+
+Using curl:
 ```bash
-http://localhost:8000
+# Health check
+curl http://localhost:8000/health
+
+# Ingest a video
+curl -X POST "http://localhost:8000/api/v1/videos" \
+  -H "Content-Type: application/json" \
+  -d '{"url": "https://example.com/video.mp4"}'
+
+# Check video status (replace {video_id} with actual ID)
+curl http://localhost:8000/api/v1/videos/{video_id}
+```
+
+Using the Swagger UI:
+1. Navigate to http://localhost:8000/docs
+2. Try the `/health` endpoint first
+3. Use the interactive interface to test video ingestion
+
+### 5. Stop the Services
+```bash
+docker-compose down
+```
+
+To stop and remove volumes (database data):
+```bash
+docker-compose down -v
 ```
 
 
