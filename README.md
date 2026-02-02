@@ -5,7 +5,10 @@
 ![FastAPI](https://img.shields.io/badge/FastAPI-async-green)
 ![Docker](https://img.shields.io/badge/docker-ready-blue)
 ![Postgres](https://img.shields.io/badge/database-postgresql-blue)
+[![Live Demo](https://img.shields.io/badge/demo-live-success)](https://video-intelligence-backend.onrender.com/docs)
 
+
+**🚀 [Live Demo](https://video-intelligence-backend.onrender.com/docs)** | **📖 [API Docs](https://video-intelligence-backend.onrender.com/docs)** | **❤️ [Health Check](https://video-intelligence-backend.onrender.com/health)**
 
 ## Problem Statement
 
@@ -122,6 +125,25 @@ docker-compose down
 To stop and remove volumes (database data):
 ```bash
 docker-compose down -v
+```
+
+
+## Live Demo
+
+The application is deployed and running at:
+- **Live API**: https://video-intelligence-backend.onrender.com
+- **Interactive Docs**: https://video-intelligence-backend.onrender.com/docs
+- **Health Check**: https://video-intelligence-backend.onrender.com/health
+
+> **Note**: The free tier may take 30-60 seconds to wake up on first request.
+
+### Try it out:
+```bash
+# Check if service is healthy
+curl https://video-intelligence-backend.onrender.com/health
+
+# Ingest a video (interactive testing via Swagger UI recommended)
+open https://video-intelligence-backend.onrender.com/docs
 ```
 
 
