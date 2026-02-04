@@ -4,11 +4,10 @@
 ![Python](https://img.shields.io/badge/python-3.12-blue)
 ![FastAPI](https://img.shields.io/badge/FastAPI-async-green)
 ![Docker](https://img.shields.io/badge/docker-ready-blue)
-![Postgres](https://img.shields.io/badge/database-postgresql-blue)
 [![Live Demo](https://img.shields.io/badge/demo-live-success)](https://video-intelligence-backend.onrender.com/docs)
 ![Status](https://img.shields.io/badge/Status-Actively%20Maintained-brightgreen)
 
-**🚀 [Live Demo](https://video-intelligence-backend.onrender.com/docs)** | **📖 [API Docs](https://video-intelligence-backend.onrender.com/docs)** | **❤️ [Health Check](https://video-intelligence-backend.onrender.com/health)**
+**[Live Demo](https://video-intelligence-backend.onrender.com/docs)** | **[API Docs](https://video-intelligence-backend.onrender.com/docs)** | **[Health Check](https://video-intelligence-backend.onrender.com/health)**
 
 ## Problem Statement
 
