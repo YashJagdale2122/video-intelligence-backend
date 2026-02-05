@@ -1,4 +1,4 @@
-## Video Intelligence Backend
+# Video Intelligence Backend
 
 ![CI](https://github.com/YashJagdale2122/video-intelligence-backend/actions/workflows/ci.yml/badge.svg)
 ![Python](https://img.shields.io/badge/python-3.12-blue)
@@ -7,97 +7,194 @@
 [![Live Demo](https://img.shields.io/badge/demo-live-success)](https://video-intelligence-backend.onrender.com/docs)
 ![Status](https://img.shields.io/badge/Status-Actively%20Maintained-brightgreen)
 
-**[Live Demo](https://video-intelligence-backend.onrender.com/docs)** | **[API Docs](https://video-intelligence-backend.onrender.com/docs)** | **[Health Check](https://video-intelligence-backend.onrender.com/health)**
+**[Live Demo](https://video-intelligence-backend.onrender.com/docs)** |
+**[API Docs](https://video-intelligence-backend.onrender.com/docs)** |
+**[Health Check](https://video-intelligence-backend.onrender.com/health)**
+
+---
+
+## Overview
+
+**Video Intelligence Backend** is a **production-oriented backend system** designed to
+ingest and process video content asynchronously.
+
+The system focuses on **backend architecture, job orchestration, and reliability**,
+treating AI pipelines as **internal processing components**, not the core system design.
+
+It is built to demonstrate how long-running, AI-heavy workloads can be handled
+without blocking API requests.
+
+---
 
 ## Problem Statement
 
-Modern video platforms require automated analysis of large volumes of video content.
-This includes transcription, visual understanding, and risk assessment — all of which
-are time-consuming and unsuitable for synchronous processing.
+Modern platforms must analyze large volumes of video content for tasks such as:
+- Transcription
+- Content understanding
+- Metadata extraction
+- Risk or compliance checks
 
+These workloads are **slow and unpredictable**, making synchronous request handling
+impractical and unreliable.
+
+---
 
 ## Solution Overview
 
-This project implements a modular FastAPI backend that ingests videos and processes
-them asynchronously using an AI pipeline. The system is designed for scalability,
-clear separation of concerns, and production readiness.
+This project implements a **layered FastAPI backend** that:
 
+- Accepts video ingestion requests via REST APIs
+- Persists job metadata and lifecycle state
+- Executes video analysis asynchronously
+- Returns immediate responses to clients
+- Tracks processing status reliably
 
-## Architecture
+The design prioritizes:
+- Clear separation of concerns
+- Async-first execution
+- Testability and maintainability
+- Future scalability (queues, workers, AI models)
 
-The design follows a layered architecture to ensure testability, maintainability, and clear separation of concerns.
+---
 
-- **API Layer**: FastAPI routes handling HTTP requests
-- **Service Layer**: Business logic and orchestration
-- **Repository Layer**: Database access using SQLAlchemy
-- **Domain Layer**: Enums and domain models
-- **Infrastructure Layer**: Database and background processing
+## Architecture Overview
 
-```bash
-Client → API → Service → Repository → Database
-                   ↓
-             Background Worker (AI processing)
+The system follows a **clean, layered backend architecture**, where request handling,
+business logic, persistence, and AI processing are clearly separated.
 
-```
+```text
+Client
+  ↓
+FastAPI API Layer
+  ↓
+Service Layer (Job Orchestration)
+  ↓
+Repository Layer
+  ↓
+PostgreSQL Database
+  ↑
+Background Worker
+  ↓
+AI Processing Pipelines
+````
 
+### Key Architectural Principles
+
+* **Async ingestion**: APIs never perform heavy processing
+* **Service-centric design**: Business logic lives outside routes
+* **Repository abstraction**: Persistence is decoupled from logic
+* **AI as a component**: Models are replaceable implementation details
+
+📄 **Detailed architecture documentation:**
+➡️ [`docs/architecture.md`](docs/architecture.md)
+
+---
+
+## Core Components
+
+### API Layer
+
+* Built with FastAPI
+* Handles request validation and response formatting
+* Exposes REST endpoints for ingestion and status retrieval
+* Remains thin and logic-free
+
+### Service Layer
+
+* Orchestrates workflows and job lifecycle
+* Manages state transitions (e.g. `UPLOADED → PROCESSING → COMPLETED`)
+* Triggers background processing
+
+### Repository Layer
+
+* Encapsulates database access using SQLAlchemy
+* Provides persistence abstraction
+* Keeps business logic database-agnostic
+
+### Background Processing
+
+* Executes long-running video analysis
+* Runs outside the request-response cycle
+* Designed to be replaced by queues/workers in future
+
+### AI Pipelines (Internal)
+
+* Transcription
+* NLP / vision analysis (stubbed)
+* Designed to be pluggable and replaceable
+
+---
 
 ## Key Features
 
-- Asynchronous video ingestion
-- Background AI processing (stubbed for extensibility)
-- Status tracking using enums
-- PostgreSQL with SQLAlchemy ORM
-- Dockerized development environment
-- Automated tests with Pytest
-- CI pipeline using GitHub Actions
+* Asynchronous video ingestion
+* Background AI processing (extensible stubs)
+* Job lifecycle tracking with domain enums
+* PostgreSQL with SQLAlchemy ORM
+* Dockerized development environment
+* Automated tests with Pytest
+* CI pipeline using GitHub Actions
+* Deployed live backend (Render)
 
+---
 
 ## Tech Stack
 
-- **Backend**: FastAPI (Python 3.12)
-- **Database**: PostgreSQL
-- **ORM**: SQLAlchemy
-- **Async Processing**: Background tasks
-- **Testing**: Pytest
-- **CI/CD**: GitHub Actions
-- **Containerization**: Docker & Docker Compose
+* **Backend**: FastAPI (Python 3.12)
+* **Database**: PostgreSQL
+* **ORM**: SQLAlchemy
+* **Async Processing**: Background tasks
+* **Testing**: Pytest
+* **CI/CD**: GitHub Actions
+* **Containerization**: Docker & Docker Compose
+
+---
 
 ## Quick Start
 
 ### Prerequisites
 
-- Docker & Docker Compose installed
-- Python 3.12+ (for local development without Docker)
-- PostgreSQL (handled by Docker Compose)
+* Docker & Docker Compose
+* Python 3.12+ (for local development)
+* PostgreSQL (managed via Docker)
+
+---
 
 ### 1. Clone the Repository
+
 ```bash
 git clone https://github.com/YashJagdale2122/video-intelligence-backend.git
 cd video-intelligence-backend
 ```
 
+---
+
 ### 2. Environment Setup
 
-Copy the example environment file:
 ```bash
 cp .env.example .env
 ```
 
-Edit `.env` with your configuration (defaults work for local development).
+Defaults work for local development.
+
+---
 
 ### 3. Start the Services
+
 ```bash
 docker-compose up --build
 ```
 
-The API will be available at:
-- **API Base**: http://localhost:8000
-- **Swagger Docs**: http://localhost:8000/docs
-- **Health Check**: http://localhost:8000/health
+Available endpoints:
+
+* API Base: [http://localhost:8000](http://localhost:8000)
+* Swagger Docs: [http://localhost:8000/docs](http://localhost:8000/docs)
+* Health Check: [http://localhost:8000/health](http://localhost:8000/health)
+
+---
 
 ### 4. Test the API
 
-Using curl:
 ```bash
 # Health check
 curl http://localhost:8000/health
@@ -107,74 +204,37 @@ curl -X POST "http://localhost:8000/api/v1/videos" \
   -H "Content-Type: application/json" \
   -d '{"url": "https://example.com/video.mp4"}'
 
-# Check video status (replace {video_id} with actual ID)
+# Get video status
 curl http://localhost:8000/api/v1/videos/{video_id}
 ```
 
-Using the Swagger UI:
-1. Navigate to http://localhost:8000/docs
-2. Try the `/health` endpoint first
-3. Use the interactive interface to test video ingestion
-
-### 5. Stop the Services
-```bash
-docker-compose down
-```
-
-To stop and remove volumes (database data):
-```bash
-docker-compose down -v
-```
-
+---
 
 ## Live Demo
 
-The application is deployed and running at:
-- **Live API**: https://video-intelligence-backend.onrender.com
-- **Interactive Docs**: https://video-intelligence-backend.onrender.com/docs
-- **Health Check**: https://video-intelligence-backend.onrender.com/health
+* **API**: [https://video-intelligence-backend.onrender.com](https://video-intelligence-backend.onrender.com)
+* **Docs**: [https://video-intelligence-backend.onrender.com/docs](https://video-intelligence-backend.onrender.com/docs)
+* **Health**: [https://video-intelligence-backend.onrender.com/health](https://video-intelligence-backend.onrender.com/health)
 
-> **Note**: The free tier may take 30-60 seconds to wake up on first request.
+> Free tier deployments may take 30–60 seconds to wake up.
 
-### Try it out:
+---
+
+## Testing
+
 ```bash
-# Check if service is healthy
-curl https://video-intelligence-backend.onrender.com/health
-
-# Ingest a video (interactive testing via Swagger UI recommended)
-open https://video-intelligence-backend.onrender.com/docs
+pytest
 ```
 
+All tests are automatically executed via **GitHub Actions** on every push.
 
-## API Example
+---
 
-### Ingest Video
-POST `/api/v1/videos`
+## Future Improvements
 
-Response:
-```json
-{
-  "video_id": "uuid",
-  "status": "UPLOADED"
-}
-```
-### Get Video Status
-GET `/api/v1/videos/{video_id}`
-
- 
- 
- ## Testing
- 
- ```bash
- pytest
- ```
- All tests are automatically executed via GitHub Actions on every push.
-
- 
- ## Future Improvements
- 
- - Real AI pipeline integration
- - Message queue (Kafka / RabbitMQ)
- - Retry & failure handling
- - Improved test coverage
- - API authentication
+* Real AI pipeline integration
+* Message queues (Kafka / RabbitMQ)
+* Retry & failure handling
+* Distributed workers
+* Authentication & authorization
+* Observability (metrics, tracing)
