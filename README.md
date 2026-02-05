@@ -11,7 +11,6 @@
 **[API Docs](https://video-intelligence-backend.onrender.com/docs)** |
 **[Health Check](https://video-intelligence-backend.onrender.com/health)**
 
----
 
 ## Overview
 
@@ -24,7 +23,6 @@ treating AI pipelines as **internal processing components**, not the core system
 It is built to demonstrate how long-running, AI-heavy workloads can be handled
 without blocking API requests.
 
----
 
 ## Problem Statement
 
@@ -37,7 +35,6 @@ Modern platforms must analyze large volumes of video content for tasks such as:
 These workloads are **slow and unpredictable**, making synchronous request handling
 impractical and unreliable.
 
----
 
 ## Solution Overview
 
@@ -55,7 +52,6 @@ The design prioritizes:
 - Testability and maintainability
 - Future scalability (queues, workers, AI models)
 
----
 
 ## Architecture Overview
 
@@ -88,7 +84,6 @@ AI Processing Pipelines
 📄 **Detailed architecture documentation:**
 ➡️ [`docs/architecture.md`](docs/architecture.md)
 
----
 
 ## Core Components
 
@@ -123,7 +118,79 @@ AI Processing Pipelines
 * NLP / vision analysis (stubbed)
 * Designed to be pluggable and replaceable
 
----
+
+## Data Flow & Job Lifecycle
+
+The system follows an **asynchronous job-based processing model** to handle
+long-running video intelligence workloads without blocking API requests.
+
+
+### 1. Video Ingestion
+
+1. Client submits a video URL via `POST /api/v1/videos`
+2. API layer validates the request
+3. Service layer creates a new job entry with status `UPLOADED`
+4. Job metadata is persisted in the database
+5. API responds immediately with a `video_id`
+
+At this stage, **no heavy processing occurs**.
+
+
+### 2. Background Processing Trigger
+
+1. After job creation, the service layer triggers background processing
+2. The job status is updated to `PROCESSING`
+3. Background worker begins video analysis independently of the API request
+
+This ensures API responsiveness under load.
+
+
+### 3. Video Analysis Pipeline
+
+The background worker performs the following steps:
+
+- Video download or access
+- Audio extraction (if applicable)
+- Invocation of AI pipelines:
+  - Speech-to-text
+  - NLP or vision analysis (stubbed / extensible)
+- Intermediate and final results are generated
+
+AI components are treated as **internal implementation details**.
+
+
+### 4. Completion or Failure Handling
+
+- On success:
+  - Job status is updated to `COMPLETED`
+  - Results are persisted and associated with the job
+
+- On failure:
+  - Job status is updated to `FAILED`
+  - Error information is logged for inspection
+
+Future extensions include retry policies and dead-letter handling.
+
+
+### 5. Status Retrieval
+
+Clients can poll job status using:
+
+GET /api/v1/videos/{video_id}
+
+
+The API returns:
+- Current processing state
+- Associated metadata
+- Processing results (when available)
+
+
+### Job State Transitions
+
+UPLOADED → PROCESSING → COMPLETED
+↘
+FAILED
+
 
 ## Key Features
 
@@ -136,7 +203,6 @@ AI Processing Pipelines
 * CI pipeline using GitHub Actions
 * Deployed live backend (Render)
 
----
 
 ## Tech Stack
 
@@ -148,7 +214,6 @@ AI Processing Pipelines
 * **CI/CD**: GitHub Actions
 * **Containerization**: Docker & Docker Compose
 
----
 
 ## Quick Start
 
@@ -158,7 +223,6 @@ AI Processing Pipelines
 * Python 3.12+ (for local development)
 * PostgreSQL (managed via Docker)
 
----
 
 ### 1. Clone the Repository
 
@@ -167,7 +231,6 @@ git clone https://github.com/YashJagdale2122/video-intelligence-backend.git
 cd video-intelligence-backend
 ```
 
----
 
 ### 2. Environment Setup
 
@@ -177,7 +240,6 @@ cp .env.example .env
 
 Defaults work for local development.
 
----
 
 ### 3. Start the Services
 
@@ -191,7 +253,6 @@ Available endpoints:
 * Swagger Docs: [http://localhost:8000/docs](http://localhost:8000/docs)
 * Health Check: [http://localhost:8000/health](http://localhost:8000/health)
 
----
 
 ### 4. Test the API
 
@@ -208,7 +269,6 @@ curl -X POST "http://localhost:8000/api/v1/videos" \
 curl http://localhost:8000/api/v1/videos/{video_id}
 ```
 
----
 
 ## Live Demo
 
@@ -218,7 +278,6 @@ curl http://localhost:8000/api/v1/videos/{video_id}
 
 > Free tier deployments may take 30–60 seconds to wake up.
 
----
 
 ## Testing
 
@@ -228,7 +287,6 @@ pytest
 
 All tests are automatically executed via **GitHub Actions** on every push.
 
----
 
 ## Future Improvements
 
