@@ -17,23 +17,24 @@
 **Video Intelligence Backend** is a **production-oriented backend system** designed to
 ingest and process video content asynchronously.
 
-The system focuses on **backend architecture, job orchestration, and reliability**,
+The project focuses on **backend architecture, job orchestration, and reliability**,
 treating AI pipelines as **internal processing components**, not the core system design.
 
-It is built to demonstrate how long-running, AI-heavy workloads can be handled
-without blocking API requests.
+It demonstrates how long-running, AI-heavy workloads can be handled **without blocking
+API requests**, using clean separation of concerns and async execution.
 
 
 ## Problem Statement
 
 Modern platforms must analyze large volumes of video content for tasks such as:
+
 - Transcription
 - Content understanding
 - Metadata extraction
 - Risk or compliance checks
 
 These workloads are **slow and unpredictable**, making synchronous request handling
-impractical and unreliable.
+impractical, unreliable, and difficult to scale.
 
 
 ## Solution Overview
@@ -47,6 +48,7 @@ This project implements a **layered FastAPI backend** that:
 - Tracks processing status reliably
 
 The design prioritizes:
+
 - Clear separation of concerns
 - Async-first execution
 - Testability and maintainability
@@ -97,7 +99,7 @@ AI Processing Pipelines
 ### Service Layer
 
 * Orchestrates workflows and job lifecycle
-* Manages state transitions (e.g. `UPLOADED → PROCESSING → COMPLETED`)
+* Manages state transitions (`UPLOADED → PROCESSING → COMPLETED`)
 * Triggers background processing
 
 ### Repository Layer
@@ -124,84 +126,129 @@ AI Processing Pipelines
 The system follows an **asynchronous job-based processing model** to handle
 long-running video intelligence workloads without blocking API requests.
 
-
 ### 1. Video Ingestion
 
 1. Client submits a video URL via `POST /api/v1/videos`
 2. API layer validates the request
-3. Service layer creates a new job entry with status `UPLOADED`
+3. Service layer creates a new job with status `UPLOADED`
 4. Job metadata is persisted in the database
 5. API responds immediately with a `video_id`
 
-At this stage, **no heavy processing occurs**.
-
+No heavy processing occurs at this stage.
 
 ### 2. Background Processing Trigger
 
-1. After job creation, the service layer triggers background processing
-2. The job status is updated to `PROCESSING`
-3. Background worker begins video analysis independently of the API request
-
-This ensures API responsiveness under load.
-
+1. Service layer triggers background processing
+2. Job status transitions to `PROCESSING`
+3. Background worker begins execution independently
 
 ### 3. Video Analysis Pipeline
 
-The background worker performs the following steps:
+The background worker performs:
 
-- Video download or access
-- Audio extraction (if applicable)
-- Invocation of AI pipelines:
-  - Speech-to-text
-  - NLP or vision analysis (stubbed / extensible)
-- Intermediate and final results are generated
+* Video access / download
+* Audio extraction (if applicable)
+* AI pipeline execution:
 
-AI components are treated as **internal implementation details**.
+  * Speech-to-text
+  * NLP / vision analysis (extensible)
+* Result generation and persistence
 
+AI components remain **internal implementation details**.
 
 ### 4. Completion or Failure Handling
 
-- On success:
-  - Job status is updated to `COMPLETED`
-  - Results are persisted and associated with the job
+* On success:
 
-- On failure:
-  - Job status is updated to `FAILED`
-  - Error information is logged for inspection
+  * Status → `COMPLETED`
+  * Results persisted
+* On failure:
 
-Future extensions include retry policies and dead-letter handling.
+  * Status → `FAILED`
+  * Error information logged
 
+Future extensions include retries and dead-letter handling.
 
 ### 5. Status Retrieval
 
-Clients can poll job status using:
+Clients poll job status using:
 
+```
 GET /api/v1/videos/{video_id}
-
-
-The API returns:
-- Current processing state
-- Associated metadata
-- Processing results (when available)
-
+```
 
 ### Job State Transitions
 
+```
 UPLOADED → PROCESSING → COMPLETED
-↘
-FAILED
+                 ↘
+                  FAILED
+```
+
+
+## API Contracts
+
+All endpoints are **versioned** to ensure backward-compatible evolution.
+
+Base path:
+
+```
+/api/v1
+```
+
+### Health Check
+
+**GET** `/health`
+
+```json
+{ "status": "ok" }
+```
+
+
+### Ingest Video
+
+**POST** `/api/v1/videos`
+
+```json
+{
+  "url": "https://example.com/video.mp4"
+}
+```
+
+Response:
+
+```json
+{
+  "video_id": "uuid",
+  "status": "UPLOADED"
+}
+```
+
+
+### Get Video Status
+
+**GET** `/api/v1/videos/{video_id}`
+
+```json
+{
+  "video_id": "uuid",
+  "status": "PROCESSING",
+  "created_at": "2026-02-06T10:15:30Z",
+  "updated_at": "2026-02-06T10:17:12Z"
+}
+```
 
 
 ## Key Features
 
 * Asynchronous video ingestion
 * Background AI processing (extensible stubs)
-* Job lifecycle tracking with domain enums
+* Explicit job lifecycle tracking
 * PostgreSQL with SQLAlchemy ORM
 * Dockerized development environment
 * Automated tests with Pytest
 * CI pipeline using GitHub Actions
-* Deployed live backend (Render)
+* Live deployed backend (Render)
 
 
 ## Tech Stack
@@ -220,63 +267,26 @@ FAILED
 ### Prerequisites
 
 * Docker & Docker Compose
-* Python 3.12+ (for local development)
+* Python 3.12+ (local development)
 * PostgreSQL (managed via Docker)
 
-
-### 1. Clone the Repository
+### Clone & Run
 
 ```bash
 git clone https://github.com/YashJagdale2122/video-intelligence-backend.git
 cd video-intelligence-backend
-```
-
-
-### 2. Environment Setup
-
-```bash
 cp .env.example .env
-```
-
-Defaults work for local development.
-
-
-### 3. Start the Services
-
-```bash
 docker-compose up --build
-```
-
-Available endpoints:
-
-* API Base: [http://localhost:8000](http://localhost:8000)
-* Swagger Docs: [http://localhost:8000/docs](http://localhost:8000/docs)
-* Health Check: [http://localhost:8000/health](http://localhost:8000/health)
-
-
-### 4. Test the API
-
-```bash
-# Health check
-curl http://localhost:8000/health
-
-# Ingest a video
-curl -X POST "http://localhost:8000/api/v1/videos" \
-  -H "Content-Type: application/json" \
-  -d '{"url": "https://example.com/video.mp4"}'
-
-# Get video status
-curl http://localhost:8000/api/v1/videos/{video_id}
 ```
 
 
 ## Live Demo
 
-* **API**: [https://video-intelligence-backend.onrender.com](https://video-intelligence-backend.onrender.com)
-* **Docs**: [https://video-intelligence-backend.onrender.com/docs](https://video-intelligence-backend.onrender.com/docs)
-* **Health**: [https://video-intelligence-backend.onrender.com/health](https://video-intelligence-backend.onrender.com/health)
+* API: [https://video-intelligence-backend.onrender.com](https://video-intelligence-backend.onrender.com)
+* Docs: [https://video-intelligence-backend.onrender.com/docs](https://video-intelligence-backend.onrender.com/docs)
+* Health: [https://video-intelligence-backend.onrender.com/health](https://video-intelligence-backend.onrender.com/health)
 
-> Free tier deployments may take 30–60 seconds to wake up.
+> Free-tier deployments may take 30–60 seconds to wake up.
 
 
 ## Testing
@@ -285,14 +295,14 @@ curl http://localhost:8000/api/v1/videos/{video_id}
 pytest
 ```
 
-All tests are automatically executed via **GitHub Actions** on every push.
+All tests run automatically via **GitHub Actions** on every push.
 
 
 ## Future Improvements
 
-* Real AI pipeline integration
+* Real AI pipeline integration (Whisper, vision models)
 * Message queues (Kafka / RabbitMQ)
-* Retry & failure handling
+* Retry & failure policies
 * Distributed workers
 * Authentication & authorization
 * Observability (metrics, tracing)
