@@ -87,6 +87,22 @@ AI Processing Pipelines
 ➡️ [`docs/architecture.md`](docs/architecture.md)
 
 
+### Design Trade-offs
+
+- **Background tasks vs message queues**  
+  Background tasks are used initially to keep the system simple and easy to reason about.
+  The architecture is designed to support migration to a message queue (Celery / RabbitMQ)
+  when higher throughput or distributed workers are required.
+
+- **Polling-based status retrieval**  
+  Clients poll for job status instead of using callbacks or WebSockets to avoid added
+  complexity in early stages and to keep the API contract simple and reliable.
+
+- **AI pipelines as internal components**  
+  AI models are treated as replaceable implementation details to avoid coupling API
+  contracts to model behavior.
+
+
 ## Core Components
 
 ### API Layer
