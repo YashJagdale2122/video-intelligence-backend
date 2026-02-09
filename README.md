@@ -254,6 +254,16 @@ Response:
 }
 ```
 
+### Error Responses
+
+All API errors follow a consistent, predictable structure to simplify client handling.
+
+**Example**
+```json
+{
+  "error": "Invalid video URL"
+}
+
 
 ## Key Features
 
