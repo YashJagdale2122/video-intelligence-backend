@@ -201,6 +201,15 @@ UPLOADED → PROCESSING → COMPLETED
                   FAILED
 ```
 
+### Job Status Semantics
+
+| Status | Meaning |
+|------|--------|
+| `UPLOADED` | Job has been accepted and persisted |
+| `PROCESSING` | Background processing is in progress |
+| `COMPLETED` | Processing finished successfully |
+| `FAILED` | Processing failed and will not continue |
+
 
 ## API Contracts
 
