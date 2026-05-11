@@ -23,6 +23,13 @@ treating AI pipelines as **internal processing components**, not the core system
 It demonstrates how long-running, AI-heavy workloads can be handled **without blocking
 API requests**, using clean separation of concerns and async execution.
 
+## Project Scope & Context
+
+This repository is a lightweight, hardware-optimized orchestration skeleton. 
+The heavy AI inference models, MinIO distributed storage, and Elasticsearch 
+components from the production version have been stubbed out. The purpose of 
+this public PoC is to demonstrate clean Domain-Driven Design, FastAPI state-
+machine logic, and asynchronous job tracking in a local Dockerized environment.
 
 ## Problem Statement
 
